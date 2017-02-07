@@ -3,7 +3,7 @@ package glfont
 import (
 	"fmt"
 	"os"
-	"github.com/raedatoui/learn-opengl-golang/utils"
+	"github.com/raedatoui/glutils"
 	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
@@ -43,7 +43,7 @@ func LoadFont(file string, scale int32, windowWidth int, windowHeight int) (*Fon
 	defer fd.Close()
 
 	// Configure the default font vertex and fragment shaders
-	program, err := utils.BasicProgram(vertexFontShader, fragmentFontShader)
+	program, err := glutils.BasicProgram(vertexFontShader, fragmentFontShader)
 	if err != nil {
 		panic(err)
 	}
