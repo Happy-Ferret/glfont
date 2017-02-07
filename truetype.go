@@ -2,7 +2,7 @@ package glfont
 
 import (
 	"fmt"
-	"github.com/go-gl/gl/all-core/gl"
+	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
@@ -43,7 +43,6 @@ func LoadTrueTypeFont(program uint32, r io.Reader, scale int32, low, high rune, 
 
 	//make each gylph
 	for ch := low; ch <= high; ch++ {
-
 		char := new(character)
 
 		//create new face to measure glyph diamensions

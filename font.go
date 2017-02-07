@@ -3,8 +3,8 @@ package glfont
 import (
 	"fmt"
 	"os"
-
-	"github.com/go-gl/gl/all-core/gl"
+	"github.com/raedatoui/learn-opengl-golang/utils"
+	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
 // Direction represents the direction in which strings should be rendered.
@@ -24,10 +24,10 @@ type Font struct {
 	vbo      uint32
 	program  uint32
 	texture  uint32 // Holds the glyph texture id.
-	color    color
+	color    fcolor
 }
 
-type color struct {
+type fcolor struct {
 	r float32
 	g float32
 	b float32
@@ -43,7 +43,7 @@ func LoadFont(file string, scale int32, windowWidth int, windowHeight int) (*Fon
 	defer fd.Close()
 
 	// Configure the default font vertex and fragment shaders
-	program, err := newProgram(vertexFontShader, fragmentFontShader)
+	program, err := utils.BasicProgram(vertexFontShader, fragmentFontShader)
 	if err != nil {
 		panic(err)
 	}
@@ -100,7 +100,6 @@ func (f *Font) Printf(x, y float32, scale float32, fs string, argv ...interface{
 
 		//skip runes that are not in font chacter range
 		if int(runeIndex)-int(lowChar) > len(f.fontChar) || runeIndex < lowChar {
-			fmt.Printf("%c %d\n", runeIndex, runeIndex)
 			continue
 		}
 
@@ -154,3 +153,45 @@ func (f *Font) Printf(x, y float32, scale float32, fs string, argv ...interface{
 
 	return nil
 }
+
+var fragmentFontShader = `#version 150 core
+in vec2 fragTexCoord;
+out vec4 outputColor;
+
+uniform sampler2D tex;
+uniform vec4 textColor;
+
+void main()
+{
+    vec4 sampled = vec4(1.0, 1.0, 1.0, texture(tex, fragTexCoord).r);
+    outputColor = textColor * sampled;
+}` + "\x00"
+
+var vertexFontShader = `#version 150 core
+
+//vertex position
+in vec2 vert;
+
+//pass through to fragTexCoord
+in vec2 vertTexCoord;
+
+//window res
+uniform vec2 resolution;
+
+//pass to frag
+out vec2 fragTexCoord;
+
+void main() {
+   // convert the rectangle from pixels to 0.0 to 1.0
+   vec2 zeroToOne = vert / resolution;
+
+   // convert from 0->1 to 0->2
+   vec2 zeroToTwo = zeroToOne * 2.0;
+
+   // convert from 0->2 to -1->+1 (clipspace)
+   vec2 clipSpace = zeroToTwo - 1.0;
+
+   fragTexCoord = vertTexCoord;
+
+   gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+}` + "\x00"
