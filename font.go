@@ -35,7 +35,7 @@ type fcolor struct {
 }
 
 //LoadFont loads the specified font at the given scale.
-func LoadFont(file string, scale int32, windowWidth int, windowHeight int) (*Font, error) {
+func LoadFont(file string, scale int32, windowWidth, windowHeight float64) (*Font, error) {
 	fd, err := os.Open(file)
 	if err != nil {
 		return nil, err
@@ -66,6 +66,14 @@ func (f *Font) SetColor(red float32, green float32, blue float32, alpha float32)
 	f.color.a = alpha
 }
 
+func (f *Font) Resize(windowWidth, windowHeight float64) {
+	// Activate corresponding render state
+	gl.UseProgram(f.program)
+
+	//set screen resolution
+	resUniform := gl.GetUniformLocation(f.program, gl.Str("resolution\x00"))
+	gl.Uniform2f(resUniform, float32(windowWidth), float32(windowHeight))
+}
 //Printf draws a string to the screen, takes a list of arguments like printf
 func (f *Font) Printf(x, y float32, scale float32, fs string, argv ...interface{}) error {
 
